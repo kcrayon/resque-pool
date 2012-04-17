@@ -1,21 +1,19 @@
+require 'resque/worker'
+
 class Resque::Pool
-
-  class PooledWorker < ::Resque::Worker
-
-    def initialize(*args)
-      @pool_master_pid = Process.pid
-      super
-    end
-
-    def pool_master_has_gone_away?
-      @pool_master_pid && @pool_master_pid != Process.ppid
-    end
+  module PooledWorker
 
     # override +shutdown?+ method
-    def shutdown?
-      super || pool_master_has_gone_away?
+    def shutdown_with_pool
+      shutdown_without_pool || Process.ppid == 1
     end
 
   end
+end
 
+Resque::Worker.class_eval do
+  include Resque::Pool::PooledWorker
+
+  alias_method :shutdown_without_pool, :shutdown?
+  alias_method :shutdown?, :shutdown_with_pool
 end
