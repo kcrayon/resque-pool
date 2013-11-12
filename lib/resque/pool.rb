@@ -177,7 +177,7 @@ module Resque
         :break
       when :TERM
         log "TERM: immediate shutdown (and immediate worker shutdown)"
-        signal_all_workers(:TERM)
+        signal_all_workers(:KILL)
         :break
       end
     end
