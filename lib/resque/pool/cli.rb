@@ -78,8 +78,11 @@ where [options] are:
 
       def process_still_running?(pidfile)
         old_pid = open(pidfile).read.strip.to_i
-        Process.kill 0, old_pid
-        true
+        if old_pid == 0
+          false
+        else
+          !!Process.kill(0, old_pid)
+        end
       rescue Errno::ESRCH
         false
       rescue Errno::EPERM
